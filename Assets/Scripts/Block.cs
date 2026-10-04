@@ -1,3 +1,4 @@
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Block : MonoBehaviour
@@ -5,8 +6,10 @@ public class Block : MonoBehaviour
     public const int Size = 5;
 
     [SerializeField] private Cell cellPrefab;
+    [SerializeField] private board board;
+    [SerializeField] private Blocks blocks;
 
-    private readonly Vector3 inputOffset =  new (0f,2f,0f);
+    private readonly Vector3 inputOffset = new(0f, 2f, 0f);
     private readonly Cell[,] cells = new Cell[Size, Size];
 
     private Vector3 previousMousePosition = Vector3.positiveInfinity;
@@ -18,6 +21,7 @@ public class Block : MonoBehaviour
     private Vector2Int previousDragPoint;
     private Vector2Int currentDragPoint;
     private Vector2 center;
+    private int polyominoIndex;
 
     private void Awake()
     {
@@ -26,9 +30,9 @@ public class Block : MonoBehaviour
 
     public void Initialize()
     {
-        for(var r = 0; r < Size; r++)
+        for (var r = 0; r < Size; r++)
         {
-            for(var c = 0;c < Size; c++)
+            for (var c = 0; c < Size; c++)
             {
                 cells[r, c] = Instantiate(cellPrefab, transform);
             }
@@ -37,19 +41,24 @@ public class Block : MonoBehaviour
         scale = transform.localScale;
     }
 
-    public void Show( int polyominosIndex)
+    public void Show(int polyominoIndex)
     {
+        // FIX 1: tên tham số trước đây là "polyominosIndex" nên field polyominoIndex không bao giờ được gán
+        this.polyominoIndex = polyominoIndex;
         Hide();
 
-        var polyomino = Polyominos.Get(polyominosIndex);
+        var polyomino = Polyominos.Get(polyominoIndex);
         var polyominoRows = polyomino.GetLength(0);
         var polyominoColumns = polyomino.GetLength(1);
-        var center = new Vector2(polyominoColumns * 0.5f, polyominoRows * 0.5f);
-        for(var r =0;r < polyominoRows; r++)
+
+        // FIX 2: bỏ "var" để gán vào field center (trước đây bị biến local che nên center luôn = (0,0))
+        center = new Vector2(polyominoColumns * 0.5f, polyominoRows * 0.5f);
+
+        for (var r = 0; r < polyominoRows; r++)
         {
-            for(var c = 0;c < polyominoColumns; c++)
+            for (var c = 0; c < polyominoColumns; c++)
             {
-                if (polyomino[r,c] > 0)
+                if (polyomino[r, c] > 0)
                 {
                     cells[r, c].transform.localPosition = new(c - center.x + .5f, r - center.y + .5f, 0.0f);
                     cells[r, c].Normal();
@@ -57,6 +66,7 @@ public class Block : MonoBehaviour
             }
         }
     }
+
     private void Hide()
     {
         for (var r = 0; r < Size; r++)
@@ -70,39 +80,108 @@ public class Block : MonoBehaviour
 
     private void OnMouseDown()
     {
-        Debug.Log("OnMouseDown");
         inputPoint = mainCamera.ScreenToWorldPoint(Input.mousePosition);
         transform.localPosition = position + inputOffset;
         transform.localScale = Vector3.one;
         currentDragPoint = Vector2Int.RoundToInt((Vector2)transform.position - center);
-        Debug.Log($"Drag point {currentDragPoint}");
+        board.Hover(currentDragPoint, polyominoIndex);
+        Highlight(board.HighlightPolyominoColumns, board.HighlightPolyominoRows);
         previousDragPoint = currentDragPoint;
 
         previousMousePosition = Input.mousePosition;
     }
+
     private void OnMouseUp()
     {
+        previousMousePosition = Vector3.positiveInfinity;
+
+        currentDragPoint = Vector2Int.RoundToInt((Vector2)transform.position - center);
+        if (board.Place(currentDragPoint, polyominoIndex) == true)
+        {
+            gameObject.SetActive(false);
+            blocks.Remove();
+        }
+        else
+        {
+            // FIX 3: đặt thất bại thì trả các ô của block về màu thường (trước đây còn kẹt sprite highlight)
+            var polyomino = Polyominos.Get(polyominoIndex);
+            Unhighlight(polyomino.GetLength(1), polyomino.GetLength(0), polyomino);
+        }
         transform.localPosition = position;
         transform.localScale = scale;
-        Debug.Log("OnMouseUp");
-        previousMousePosition = Vector3.positiveInfinity;
     }
+
     private void OnMouseDrag()
     {
         var currentMousePosition = Input.mousePosition;
         if (currentMousePosition != previousMousePosition)
         {
             previousMousePosition = currentMousePosition;
-            Debug.Log("OnMouseDrag");
 
             var inputDelta = (Vector2)mainCamera.ScreenToWorldPoint(Input.mousePosition) - inputPoint;
-            transform.position = position + inputOffset + (Vector3)inputDelta*1.4f;
+            // FIX 4: dùng localPosition cho đồng nhất với OnMouseDown / OnMouseUp (position là local)
+            transform.localPosition = position + inputOffset + (Vector3)inputDelta * 1.4f;
 
             currentDragPoint = Vector2Int.RoundToInt((Vector2)transform.position - center);
-            if(currentDragPoint != previousDragPoint)
+            if (currentDragPoint != previousDragPoint)
             {
                 previousDragPoint = currentDragPoint;
-                Debug.Log($"Drag point {currentDragPoint}");
+                board.Hover(currentDragPoint, polyominoIndex);
+                Highlight(board.HighlightPolyominoColumns, board.HighlightPolyominoRows);
+            }
+        }
+    }
+
+    private void Highlight(List<int> columns, List<int> rows)
+    {
+        var polyomino = Polyominos.Get(polyominoIndex);
+        var polyominoRows = polyomino.GetLength(0);
+        var polyominoColumns = polyomino.GetLength(1);
+
+        Unhighlight(polyominoColumns, polyominoRows, polyomino);
+
+        HighlightColumns(polyominoRows, polyomino, columns);
+        HighlightRows(polyominoColumns, polyomino, rows);
+    }
+
+    private void HighlightRows(int polyominoColumns, int[,] polyomino, List<int> rows)
+    {
+        foreach (var r in rows)
+        {
+            for (var c = 0; c < polyominoColumns; c++)
+            {
+                if (polyomino[r, c] > 0)
+                {
+                    cells[r, c].Highlight();
+                }
+            }
+        }
+    }
+
+    private void HighlightColumns(int polyominoRows, int[,] polyomino, List<int> columns)
+    {
+        foreach (var c in columns)
+        {
+            for (var r = 0; r < polyominoRows; r++)
+            {
+                if (polyomino[r, c] > 0)
+                {
+                    cells[r, c].Highlight();
+                }
+            }
+        }
+    }
+
+    private void Unhighlight(int polyominoColumns, int polyominoRows, int[,] polyomino)
+    {
+        for (var r = 0; r < polyominoRows; r++)
+        {
+            for (var c = 0; c < polyominoColumns; c++)
+            {
+                if (polyomino[r, c] > 0)
+                {
+                    cells[r, c].Normal();
+                }
             }
         }
     }
