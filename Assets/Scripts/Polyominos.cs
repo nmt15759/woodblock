@@ -6,7 +6,7 @@ public static class Polyominos
 {
     private const int BoardSize = 8;
 
-    // Hình gốc + trọng số (đã gộp mọi hướng xoay/gương). Hàng cách nhau bằng '/'
+  
     private static readonly (string pattern, float weight)[] baseShapes =
     {
         ("1", 1f), ("11", 2f), ("111", 3f), ("1111", 3f),
@@ -31,7 +31,7 @@ public static class Polyominos
                 continue;
             }
 
-            // 8 hướng (4 xoay x 2 gương), khóa chuỗi giúp tự loại bản trùng
+          
             var variants = new Dictionary<string, int[,]>();
             for (var m = 0; m < 2; m++, shape = Mirror(shape))
                 for (var i = 0; i < 4; i++, shape = Rotate(shape))
@@ -40,7 +40,7 @@ public static class Polyominos
             foreach (var v in variants.Values)
             {
                 polyominos.Add(v);
-                weights.Add(weight / variants.Count); // chia đều trọng số cho các hướng
+                weights.Add(weight / variants.Count);
             }
         }
 
@@ -51,7 +51,7 @@ public static class Polyominos
 
     public static int Length => polyominos.Count;
 
-    // Bốc ngẫu nhiên 1 index theo trọng số
+  
     public static int RandomIndex()
     {
         var roll = Random.value * totalWeight;
@@ -78,14 +78,13 @@ public static class Polyominos
         return Build(rows.Length, rows[0].Length, (r, c) => rows[r][c] == '1' ? 1 : 0);
     }
 
-    // Xoay 90° theo chiều kim đồng hồ
+
     private static int[,] Rotate(int[,] s)
     {
         var h = s.GetLength(0);
         return Build(s.GetLength(1), h, (r, c) => s[h - 1 - c, r]);
     }
 
-    // Lật ngang
     private static int[,] Mirror(int[,] s)
     {
         var w = s.GetLength(1);

@@ -22,6 +22,7 @@ public class Block : MonoBehaviour
     private Vector2Int currentDragPoint;
     private Vector2 center;
     private int polyominoIndex;
+    private bool dragging;
 
     private void Awake()
     {
@@ -43,7 +44,7 @@ public class Block : MonoBehaviour
 
     public void Show(int polyominoIndex)
     {
-        // FIX 1: tên tham số trước đây là "polyominosIndex" nên field polyominoIndex không bao giờ được gán
+
         this.polyominoIndex = polyominoIndex;
         Hide();
 
@@ -51,7 +52,7 @@ public class Block : MonoBehaviour
         var polyominoRows = polyomino.GetLength(0);
         var polyominoColumns = polyomino.GetLength(1);
 
-        // FIX 2: bỏ "var" để gán vào field center (trước đây bị biến local che nên center luôn = (0,0))
+
         center = new Vector2(polyominoColumns * 0.5f, polyominoRows * 0.5f);
 
         for (var r = 0; r < polyominoRows; r++)
@@ -80,6 +81,10 @@ public class Block : MonoBehaviour
 
     private void OnMouseDown()
     {
+        // Panel cài đặt đang mở thì không cho kéo block phía sau
+        if (SettingsMenu.IsOpen) return;
+        dragging = true;
+
         inputPoint = mainCamera.ScreenToWorldPoint(Input.mousePosition);
         transform.localPosition = position + inputOffset;
         transform.localScale = Vector3.one;
@@ -93,6 +98,9 @@ public class Block : MonoBehaviour
 
     private void OnMouseUp()
     {
+        if (!dragging) return;
+        dragging = false;
+
         previousMousePosition = Vector3.positiveInfinity;
 
         currentDragPoint = Vector2Int.RoundToInt((Vector2)transform.position - center);
@@ -103,7 +111,6 @@ public class Block : MonoBehaviour
         }
         else
         {
-            // FIX 3: đặt thất bại thì trả các ô của block về màu thường (trước đây còn kẹt sprite highlight)
             var polyomino = Polyominos.Get(polyominoIndex);
             Unhighlight(polyomino.GetLength(1), polyomino.GetLength(0), polyomino);
         }
@@ -113,13 +120,14 @@ public class Block : MonoBehaviour
 
     private void OnMouseDrag()
     {
+        if (!dragging) return;
+
         var currentMousePosition = Input.mousePosition;
         if (currentMousePosition != previousMousePosition)
         {
             previousMousePosition = currentMousePosition;
 
             var inputDelta = (Vector2)mainCamera.ScreenToWorldPoint(Input.mousePosition) - inputPoint;
-            // FIX 4: dùng localPosition cho đồng nhất với OnMouseDown / OnMouseUp (position là local)
             transform.localPosition = position + inputOffset + (Vector3)inputDelta * 1.4f;
 
             currentDragPoint = Vector2Int.RoundToInt((Vector2)transform.position - center);

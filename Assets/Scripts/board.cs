@@ -6,6 +6,7 @@ public class board : MonoBehaviour
     public const int Size = 8;
     [SerializeField] private Cell cellPrefab;
     [SerializeField] private Transform cellTransform;
+    [SerializeField] private GameManager gameManager;
 
     private readonly Cell[,] cells = new Cell[Size, Size];
 
@@ -138,7 +139,7 @@ public class board : MonoBehaviour
     private void PredictFullLineRows(int fromRow, int toRowExclusive)
     {
         fullLineRows.Clear();
-        // FIX 8: giới hạn trong bảng để tránh IndexOutOfRange
+
         for (var r = Mathf.Max(0, fromRow); r < Mathf.Min(Size, toRowExclusive); r++)
         {
             var isFullLine = true;
@@ -210,7 +211,7 @@ public class board : MonoBehaviour
 
     private void Hover()
     {
-        // đổi tên biến lặp để không trùng tên với field hoverPoints
+
         foreach (var p in hoverPoints)
         {
             data[p.y, p.x] = 1;
@@ -247,6 +248,7 @@ public class board : MonoBehaviour
 
     private void Place(Vector2Int point, int polyominoColumns, int polyominoRows)
     {
+        var placedCells = hoverPoints.Count;
         foreach (var p in hoverPoints)
         {
             data[p.y, p.x] = 2;
@@ -254,6 +256,27 @@ public class board : MonoBehaviour
         }
         ClearFullLines(point, polyominoColumns, polyominoRows);
         hoverPoints.Clear();
+
+        var clearedLines = fullLineColumns.Count + fullLineRows.Count;
+        gameManager.AddScore(placedCells, clearedLines);
+    }
+
+    public void ResetBoard()
+    {
+        hoverPoints.Clear();
+        fullLineColumns.Clear();
+        fullLineRows.Clear();
+        highlightPolyominoColumns.Clear();
+        highlightPolyominoRows.Clear();
+
+        for (var r = 0; r < Size; r++)
+        {
+            for (var c = 0; c < Size; c++)
+            {
+                data[r, c] = 0;
+                cells[r, c].Hide();
+            }
+        }
     }
 
     private void ClearFullLines(Vector2Int point, int polyominoColumns, int polyominoRows)
@@ -337,7 +360,7 @@ public class board : MonoBehaviour
         var polyominoRows = polyomino.GetLength(0);
         var polyominoColumns = polyomino.GetLength(1);
 
-        // FIX 9: phải dùng <= (trước dùng < nên bỏ sót hàng/cột cuối cùng của bảng)
+
         for (var r = 0; r <= Size - polyominoRows; r++)
         {
             for (var c = 0; c <= Size - polyominoColumns; c++)

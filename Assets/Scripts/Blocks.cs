@@ -4,8 +4,9 @@ public class Blocks : MonoBehaviour
 {
     [SerializeField] private board board;
     [SerializeField] private Block[] blocks;
+    [SerializeField] private GameManager gameManager;
 
-   
+
     private int blockCount = 0;
     private int[] polyominoIndexes;
 
@@ -38,6 +39,11 @@ public class Blocks : MonoBehaviour
         }
     }
 
+    public void Restart()
+    {
+        Generate();
+    }
+
     public void Remove()
     {
         blockCount--;
@@ -58,6 +64,7 @@ public class Blocks : MonoBehaviour
         if (lose == true)
         {
             Debug.Log("Lose");
+            gameManager.GameOver();
         }
     }
 }
