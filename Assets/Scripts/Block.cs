@@ -81,9 +81,12 @@ public class Block : MonoBehaviour
 
     private void OnMouseDown()
     {
-        // Panel cài đặt đang mở thì không cho kéo block phía sau
+
         if (SettingsMenu.IsOpen) return;
         dragging = true;
+        if (SettingsMenu.IsOpen) return;
+        dragging = true;
+        SFXManager.PlayTouch();   
 
         inputPoint = mainCamera.ScreenToWorldPoint(Input.mousePosition);
         transform.localPosition = position + inputOffset;
@@ -100,11 +103,16 @@ public class Block : MonoBehaviour
     {
         if (!dragging) return;
         dragging = false;
-
         previousMousePosition = Vector3.positiveInfinity;
 
         currentDragPoint = Vector2Int.RoundToInt((Vector2)transform.position - center);
-        if (board.Place(currentDragPoint, polyominoIndex) == true)
+
+        transform.localPosition = position;
+        transform.localScale = scale;
+
+        SFXManager.PlayTouch();
+
+        if (board.Place(currentDragPoint, polyominoIndex))
         {
             gameObject.SetActive(false);
             blocks.Remove();
@@ -114,8 +122,6 @@ public class Block : MonoBehaviour
             var polyomino = Polyominos.Get(polyominoIndex);
             Unhighlight(polyomino.GetLength(1), polyomino.GetLength(0), polyomino);
         }
-        transform.localPosition = position;
-        transform.localScale = scale;
     }
 
     private void OnMouseDrag()

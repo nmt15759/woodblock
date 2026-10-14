@@ -104,6 +104,7 @@ public class GameManager : MonoBehaviour
     public void GameOver()
     {
         PlayerPrefs.Save();
+        SFXManager.StopGameMusic();
 
         if (gameOverPanel != null)
         {
@@ -117,6 +118,7 @@ public class GameManager : MonoBehaviour
         combo = 0;
         movesWithoutClear = 0;
         HidePraise();
+        SFXManager.PlayGameMusic();
 
         if (gameOverPanel != null)
         {

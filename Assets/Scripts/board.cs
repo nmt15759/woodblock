@@ -6,7 +6,7 @@ public class board : MonoBehaviour
     public const int Size = 8;
     [SerializeField] private Cell cellPrefab;
     [SerializeField] private Transform cellTransform;
-    [SerializeField] private GameManager gameManager;
+    [SerializeField] private    GameManager gameManager;
 
     private readonly Cell[,] cells = new Cell[Size, Size];
 
@@ -258,6 +258,10 @@ public class board : MonoBehaviour
         hoverPoints.Clear();
 
         var clearedLines = fullLineColumns.Count + fullLineRows.Count;
+        if (clearedLines > 0)
+        {
+            SFXManager.PlayStoneBreak(); 
+        }
         gameManager.AddScore(placedCells, clearedLines);
     }
 
