@@ -56,7 +56,7 @@ public class board : MonoBehaviour
             }
             foreach (var fullLineRow in fullLineRows)
             {
-                // FIX 6: trước đây add nhầm vào highlightPolyominoColumns
+             
                 highlightPolyominoRows.Add(fullLineRow - point.y);
             }
         }
@@ -66,7 +66,6 @@ public class board : MonoBehaviour
     {
         UnHighlightFullLineColumns();
         UnHighlightFullLineRows();
-        // FIX 7: xoá danh sách cũ để không giữ dữ liệu lỗi thời
         fullLineColumns.Clear();
         fullLineRows.Clear();
     }

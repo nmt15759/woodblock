@@ -8,10 +8,10 @@ public class SettingsMenu : MonoBehaviour
     private const string VolumeKey = "BlockPuzzle_Volume";
     private const string BrightnessKey = "BlockPuzzle_Brightness";
 
-    // Độ sáng thấp nhất cho phép (1 = sáng nhất). Không cho về 0 để màn hình không bị đen hẳn.
+    
     private const float MinBrightness = 0.2f;
 
-    // true khi panel đang mở. Block dùng cờ này để không cho kéo block phía sau panel.
+  
     public static bool IsOpen { get; private set; }
 
     [Header("Scene menu (tên phải giống chính xác tên file scene)")]
@@ -22,12 +22,12 @@ public class SettingsMenu : MonoBehaviour
     [SerializeField] private Button settingButton;
     [SerializeField] private Button closeButton;
     [FormerlySerializedAs("quitButton")]
-    [SerializeField] private Button menuButton; // nút "Quit" cũ, nay quay về menu
+    [SerializeField] private Button menuButton;
 
     [Header("Âm lượng / độ sáng")]
     [SerializeField] private Slider volumeSlider;
     [SerializeField] private Slider brightnessSlider;
-    [SerializeField] private Image brightnessOverlay; // Image đen phủ full màn hình
+    [SerializeField] private Image brightnessOverlay; 
 
     private void Start()
     {
@@ -56,14 +56,13 @@ public class SettingsMenu : MonoBehaviour
         if (closeButton != null) closeButton.onClick.AddListener(Close);
         if (menuButton != null) menuButton.onClick.AddListener(BackToMenu);
 
-        // Áp dụng giá trị đã lưu ngay khi vào game
+       
         SetVolume(volume);
         SetBrightness(brightness);
     }
 
     private void Update()
     {
-        // Phím Esc mở/đóng panel (hữu ích khi test trên máy tính)
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Toggle();
@@ -116,15 +115,14 @@ public class SettingsMenu : MonoBehaviour
 
     private void SetVolume(float value)
     {
-        // Ảnh hưởng toàn bộ âm thanh trong game (nhạc nền lẫn hiệu ứng)
+       
         AudioListener.volume = value;
         PlayerPrefs.SetFloat(VolumeKey, value);
     }
 
     private void SetBrightness(float value)
     {
-        // Unity không chỉnh được độ sáng màn hình thật,
-        // nên làm tối bằng cách phủ một lớp đen trong suốt lên trên game
+        
         if (brightnessOverlay != null)
         {
             brightnessOverlay.color = new Color(0f, 0f, 0f, 1f - value);

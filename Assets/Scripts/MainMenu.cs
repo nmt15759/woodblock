@@ -11,7 +11,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private Button playButton;
     [SerializeField] private Button howToPlayButton;
     [SerializeField] private Button quitButton;
-    [SerializeField] private Button closeButton; // nút Close nằm trong How to Play Panel
+    [SerializeField] private Button closeButton; 
 
     [Header("Panel hướng dẫn")]
     [SerializeField] private GameObject howToPlayPanel;
@@ -23,13 +23,13 @@ public class MainMenu : MonoBehaviour
         if (closeButton != null) closeButton.onClick.AddListener(CloseHowToPlay);
         if (quitButton != null) quitButton.onClick.AddListener(Quit);
 
-        // Panel luôn đóng khi vào menu
+     
         if (howToPlayPanel != null) howToPlayPanel.SetActive(false);
     }
 
     private void Update()
     {
-        // Esc đóng panel hướng dẫn nếu đang mở
+   
         if (Input.GetKeyDown(KeyCode.Escape) && howToPlayPanel != null && howToPlayPanel.activeSelf)
         {
             CloseHowToPlay();

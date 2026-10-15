@@ -7,18 +7,18 @@ public class GameManager : MonoBehaviour
 {
     private const string HighScoreKey = "BlockPuzzle_HighScore";
 
-    // Điểm thưởng khi xóa hàng/cột: lines * lines * LineBonus (xóa nhiều hàng cùng lúc thì thưởng cao hơn)
+   
     private const int LineBonus = 10;
 
-    // Số lượt liên tiếp không xóa được hàng thì combo bị reset
+  
     private const int MaxMovesWithoutClear = 3;
 
-    // Thời gian hiệu ứng chữ khen (giây)
+
     private const float PopTime = 0.3f;
     private const float HoldTime = 0.7f;
     private const float FadeTime = 0.3f;
 
-    // Chữ khen theo mức độ, mức càng cao càng "đã"
+ 
     private static readonly string[] Praises =
     {
         "Good!", "Great!", "Excellent!", "Amazing!", "Unbelievable!"
@@ -31,13 +31,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TMP_Text scoreLabel;
     [SerializeField] private TMP_Text highScoreLabel;
     [SerializeField] private Button replayButton;
-    [SerializeField] private GameObject gameOverPanel; // không bắt buộc, để trống cũng được
-    [SerializeField] private TMP_Text praiseLabel;     // chữ khen khi xóa hàng, không bắt buộc
+    [SerializeField] private GameObject gameOverPanel; 
+    [SerializeField] private TMP_Text praiseLabel;    
 
     private int score;
     private int highScore;
-    private int combo;             // số lần xóa hàng liên tiếp
-    private int movesWithoutClear; // số lượt liên tiếp không xóa được hàng
+    private int combo;             
+    private int movesWithoutClear; 
     private Coroutine praiseRoutine;
 
     private void Start()
@@ -68,7 +68,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Board gọi hàm này mỗi lần đặt block thành công
+   
     public void AddScore(int placedCells, int clearedLines)
     {
         var points = placedCells;
@@ -100,7 +100,7 @@ public class GameManager : MonoBehaviour
         UpdateLabels();
     }
 
-    // Blocks gọi hàm này khi không còn block nào đặt được
+  
     public void GameOver()
     {
         PlayerPrefs.Save();
@@ -172,7 +172,7 @@ public class GameManager : MonoBehaviour
         praiseLabel.color = color;
         praiseLabel.gameObject.SetActive(true);
 
-        // Phóng to có độ nảy
+      
         for (var time = 0f; time < PopTime; time += Time.deltaTime)
         {
             rect.localScale = Vector3.one * Mathf.LerpUnclamped(0.3f, 1f, EaseOutBack(time / PopTime));
@@ -182,7 +182,7 @@ public class GameManager : MonoBehaviour
 
         yield return new WaitForSeconds(HoldTime);
 
-        // Mờ dần rồi ẩn
+        
         for (var time = 0f; time < FadeTime; time += Time.deltaTime)
         {
             color.a = 1f - time / FadeTime;
